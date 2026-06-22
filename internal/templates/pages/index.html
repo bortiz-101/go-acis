@@ -1,0 +1,29 @@
+{{define "content"}}
+<div class="text-center my-8">
+  <h1 class="text-4xl font-extrabold tracking-tight text-blue-600">
+    Go-ACIS Dashboard
+  </h1>
+  <p class="text-gray-500 mt-2">
+    A modern interface for Reginal Climate Center data.
+  </p>
+</div>
+
+<div class="bg-white p-6 rounded-xl shadow-xs border-gray-200">
+  <form hx-post="/query" hx-targe="#weather-results" class="flex gap-4">
+    <input
+      type="text"
+      name="station"
+      placeholder="Enter Station ID (e.g., ORD, LAX)"
+      class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500"
+    />
+    <button
+      type="submit"
+      class="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+    >
+      Fetch Weather
+    </button>
+  </form>
+</div>
+
+<div id="weather-results" class="mt-6"></div>
+{{end}}
