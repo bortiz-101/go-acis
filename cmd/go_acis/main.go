@@ -1,6 +1,10 @@
 package main
 
-import apihttp "github.com/bortiz-101/go-acis/internal/http"
+import (
+	"log"
+
+	apihttp "github.com/bortiz-101/go-acis/internal/http"
+)
 
 /*
 This func will be entry point for whole api. Will eventually:
@@ -11,5 +15,9 @@ This func will be entry point for whole api. Will eventually:
 */
 func main() {
 	router := apihttp.CreateRouter()
-	router.Run() // 8080 by default
+	// 8080 by default
+	err := router.Run()
+	if err != nil {
+		log.Fatal("ERROR:", err)
+	}
 }
