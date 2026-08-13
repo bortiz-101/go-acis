@@ -1,5 +1,27 @@
 # go-acis
 
-Work in Progress (WIP) — A modern Go interactive web interface for Applied Climate Information System (ACIS) web services, inspired by xmacis.
+## Project structure
 
-go-acis provides an idiomatic, strongly-typed Go client alongside a server-side rendered dashboard for querying NOAA / Regional Climate Center (RCC) weather and climatological datasets.
+```text
+go-acis/
+├── .github/                  
+│   └── workflows/            
+│       └── ci.yml
+├── cmd/                      
+│   └── go-acis/              
+│       └── main.go           # entry point for the api / what actually starts our API
+├── internal/                 # private business logic and app implementation.
+│   ├── acis/      
+│   ├── config/               # structs and data types for ACIS
+│   │   └── config.go         # will read env vars and turn them into a typed go objects/whatever we need them for
+│   └── http/                 
+│       ├── handlers/         # basically whenever a route is hit, what function handles it
+│       │   └── health.go     # handler for our first endpoint
+│       └── router.go         # define all of our endpoints and routes
+├── .gitignore
+├── Dockerfile
+├── go.mod
+├── go.sum
+├── LICENSE
+└── README.md
+```

@@ -1,1 +1,23 @@
-package go_acis
+package main
+
+import (
+	"log"
+
+	apihttp "github.com/bortiz-101/go-acis/internal/http"
+)
+
+/*
+This func will be entry point for whole api. Will eventually:
+-create the ACIS client
+-connect to our db
+-load configs
+-create and run our gin router
+*/
+func main() {
+	router := apihttp.CreateRouter()
+	// 8080 by default
+	err := router.Run()
+	if err != nil {
+		log.Fatal("ERROR:", err)
+	}
+}
