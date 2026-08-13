@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -20,7 +20,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: 'go.mod'
+          go-version-file: "go.mod"
           check-latest: true
           cache: true
 
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: ['1.26.5']
+        go-version: ["1.26.5"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -61,4 +61,4 @@ jobs:
         run: go test -v -race -coverprofile=coverage.out ./...
 
       - name: Build server binary
-        run: go build -v -o bin/server ./cmd/go-acis
+        run: go build -v -o bin/server ./cmd/go_acis
