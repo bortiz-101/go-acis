@@ -18,7 +18,7 @@ type StnMetaRequest struct {
 	CWA     string      `json:"cwa"`
 	Basin   int         `json:"basin"`
 	State   string      `json:"state"`
-	BBOX    float64     `json:"bbox"`
+	BBOX    []float64   `json:"bbox"`
 	Meta    *[]string   `json:"meta,omitempty"`
 	Elems   *[]int      `json:"elems,omitempty"`
 	SDate   *string     `json:"sdate,omitempty"`
@@ -74,17 +74,17 @@ type Element struct {
 	VN   *int     `json:"vN,omitempty"`
 	Base *float64 `json:"base,omitempty"`
 
-	Interval    Interval    `json:"interval,omitempty"`
-	Duration    *string     `json:"duration,omitempty"`
-	Reduce      Reduce      `json:"reduce,omitempty"`
-	SeasonStart SeasonStart `json:"season_start,omitempty"`
-	Add         []string    `json:"add,omitempty"`
-	Normal      Normal      `json:"normal,omitempty"`
-	MaxMissing  *int        `json:"maxmissing,omitempty"`
-	Prec        *int        `json:"prec,omitemtpy"`
-	SMRY        Summary     `json:"smry,omitempty"`
-	SMRYONLY    *int        `json:"smry_only,omitempty"`
-	GroupBy     GroupBy     `json:"groupby,omitempty"`
+	Interval    *Interval    `json:"interval,omitempty"`
+	Duration    *string      `json:"duration,omitempty"`
+	Reduce      *Reduce      `json:"reduce,omitempty"`
+	SeasonStart *SeasonStart `json:"season_start,omitempty"`
+	Add         []string     `json:"add,omitempty"`
+	Normal      *Normal      `json:"normal,omitempty"`
+	MaxMissing  *int         `json:"maxmissing,omitempty"`
+	Prec        *int         `json:"prec,omitempty"`
+	SMRY        *Summary     `json:"smry,omitempty"`
+	SMRYONLY    *int         `json:"smry_only,omitempty"`
+	GroupBy     *GroupBy     `json:"groupby,omitempty"`
 }
 
 type StnDataRequest struct {
@@ -95,4 +95,79 @@ type StnDataRequest struct {
 	Elems  []Element   `json:"elems"`
 	Meta   *[]string   `json:"meta,omitempty"`
 	Output *OutputType `json:"output,omitempty"`
+}
+
+type MultiStnDataRequest struct {
+	SDate   string      `json:"sdate"`
+	EDate   string      `json:"edate"`
+	Date    string      `json:"date"`
+	Elems   []Element   `json:"elems"`
+	County  int         `json:"county"`
+	CLIMDIV int         `json:"climdiv"`
+	CWA     string      `json:"cwa"`
+	Basin   int         `json:"basin"`
+	State   string      `json:"state"`
+	BBOX    []float64   `json:"bbox"`
+	SIDS    []string    `json:"sids"`
+	Meta    *[]string   `json:"meta,omitempty"`
+	Output  *OutputType `json:"output,omitempty"`
+}
+
+type Projection string
+
+const (
+	ProjectionLCC Projection = "lcc"
+)
+
+type Interpolation string
+
+const (
+	InterpolationCSpline Interpolation = "cspline"
+	InterpolationNone    Interpolation = "none"
+)
+
+type ImageSpec struct {
+	InfoOnly *string        `json:"info_only,omitempty"`
+	Proj     *Projection    `json:"proj,omitempty"`
+	Overlays []string       `json:"overlays,omitempty"`
+	Interp   *Interpolation `json:"interp,omitempty"`
+	CMap     *string        `json:"cmap,omitempty"`
+	Width    *int           `json:"width,omitempty"`
+	Height   *int           `json:"height,omitempty"`
+	Levels   []float64      `json:"levels,omitempty"`
+}
+
+type GridRequest struct {
+	Grid   int         `json:"grid"`
+	SDate  *string     `json:"sdate,omitempty"`
+	EDate  string      `json:"edate"`
+	Date   string      `json:"date"`
+	Elems  []Element   `json:"elems"`
+	LOC    float64     `json:"loc"`
+	State  string      `json:"state"`
+	BBOX   []float64   `json:"bbox"`
+	Meta   *[]string   `json:"meta,omitempty"`
+	Output *OutputType `json:"output,omitempty"`
+	Image  *ImageSpec  `json:"image,omitempty"`
+}
+
+type Grid2Request struct {
+	Grid   int         `json:"grid"`
+	SDate  *string     `json:"sdate,omitempty"`
+	EDate  string      `json:"edate"`
+	Date   string      `json:"date"`
+	Elems  []Element   `json:"elems"`
+	LOC    float64     `json:"loc"`
+	State  string      `json:"state"`
+	BBOX   []float64   `json:"bbox"`
+	County int         `json:"county"`
+	Meta   *[]string   `json:"meta,omitempty"`
+	Output *OutputType `json:"output,omitempty"`
+}
+
+type GeneralRequest struct {
+	State string    `json:"state"`
+	ID    int       `json:"id"`
+	BBOX  []float64 `json:"bbox"`
+	Meta  *[]string `json:"meta,omitempty"`
 }
