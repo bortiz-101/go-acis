@@ -7,8 +7,10 @@ package acis
 type OutputType string
 
 const (
-	OutputJSON OutputType = "json"
-	OutputCSV  OutputType = "csv"
+	OutputJSON    OutputType = "json"
+	OutputCSV     OutputType = "csv"
+	OutputGIF     OutputType = "gif"
+	OutputGeoTIFF OutputType = "geotiff"
 )
 
 type StnMetaRequest struct {
@@ -140,10 +142,10 @@ type ImageSpec struct {
 type GridRequest struct {
 	Grid     int         `json:"grid"`
 	SDate    *string     `json:"sdate,omitempty"`
-	EDate    string      `json:"edate"`
-	Date     string      `json:"date"`
+	EDate    *string     `json:"edate"`
+	Date     *string     `json:"date"`
 	Elements []Element   `json:"elems"`
-	LOC      float64     `json:"loc"`
+	LOC      *float64    `json:"loc"`
 	State    string      `json:"state"`
 	BBOX     []float64   `json:"bbox"`
 	Meta     *[]string   `json:"meta,omitempty"`
@@ -167,7 +169,7 @@ type Grid2Request struct {
 
 type GeneralRequest struct {
 	State string    `json:"state"`
-	ID    int       `json:"id"`
+	ID    string    `json:"id"`
 	BBOX  []float64 `json:"bbox"`
 	Meta  *[]string `json:"meta,omitempty"`
 }

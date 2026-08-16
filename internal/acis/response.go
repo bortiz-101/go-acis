@@ -7,22 +7,17 @@ type DateRange struct {
 	End   *string
 }
 
-type Coordinates struct {
-	Longitude float64
-	Latitude  float64
-}
-
 type StationMeta struct {
-	Name           string       `json:"name,omitempty"`
-	State          string       `json:"state,omitempty"`
-	SIDS           []string     `json:"sids,omitempty"`
-	SIDDATES       []DateRange  `json:"sid_dates,omitempty"`
-	LL             *Coordinates `json:"ll,omitempty"`
-	Elevation      float64      `json:"elev,omitempty"`
-	UID            string       `json:"uid,omitempty"`
-	County         string       `json:"county,omitempty"`
-	CLIMDIV        string       `json:"climdiv,omitempty"`
-	ValidDataRange []DateRange  `json:"valid_daterange,omitempty"`
+	Name           string      `json:"name,omitempty"`
+	State          string      `json:"state,omitempty"`
+	SIDS           []string    `json:"sids,omitempty"`
+	SIDDATES       []DateRange `json:"sid_dates,omitempty"`
+	LL             [2]float64  `json:"ll,omitempty"`
+	Elevation      float64     `json:"elev,omitempty"`
+	UID            int         `json:"uid,omitempty"`
+	County         string      `json:"county,omitempty"`
+	CLIMDIV        string      `json:"climdiv,omitempty"`
+	ValidDataRange []DateRange `json:"valid_daterange,omitempty"`
 }
 
 type StnMetaResonpse struct {
@@ -61,7 +56,7 @@ type MultiStnDataResponse struct {
 
 type GridMeta struct {
 	Lat       [][]float64 `json:"lat,omitempty"`
-	Long      [][]float64 `json:"lon,omitempty"`
+	Lon       [][]float64 `json:"lon,omitempty"`
 	Elevation [][]float64 `json:"elev,omitempty"`
 }
 
@@ -78,7 +73,21 @@ type GridDataResponse struct {
 }
 
 type Grid2Response struct {
-	Meta *GridMeta       `json:"meta,omitempty"`
-	Data json.RawMessage `json:"data,omitempty"`
-	SMRY json.RawMessage `json:"smry,omitempty"`
+	Meta  *GridMeta       `json:"meta,omitempty"`
+	Data  json.RawMessage `json:"data,omitempty"`
+	SMRY  json.RawMessage `json:"smry,omitempty"`
+	Error string          `json:"error,omitempty"`
+}
+
+type GeneralMeta struct {
+	ID      string          `json:"id,omitempty"`
+	Name    string          `json:"name,omitempty"`
+	BBOX    [4]float64      `json:"bbox,omitempty"`
+	GeoJSON json.RawMessage `json:"geojson,omitempty"`
+	State   string          `json:"state,omitempty"`
+}
+
+type GeneralResponse struct {
+	Meta  []GeneralMeta `json:"meta,omitempty"`
+	Error string        `json:"error,omitempty"`
 }
