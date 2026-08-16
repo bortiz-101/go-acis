@@ -1,3 +1,5 @@
+// Package acis defines response types used to decode results returned by
+// the ACIS web services.
 package acis
 
 import "encoding/json"
