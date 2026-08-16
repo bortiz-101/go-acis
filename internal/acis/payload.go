@@ -12,19 +12,19 @@ const (
 )
 
 type StnMetaRequest struct {
-	SIDS    []string    `json:"sids"`
-	County  int         `json:"county"`
-	CLIMDIV int         `json:"climdiv"`
-	CWA     string      `json:"cwa"`
-	Basin   int         `json:"basin"`
-	State   string      `json:"state"`
-	BBOX    []float64   `json:"bbox"`
-	Meta    *[]string   `json:"meta,omitempty"`
-	Elems   *[]int      `json:"elems,omitempty"`
-	SDate   *string     `json:"sdate,omitempty"`
-	EDate   *string     `json:"edate,omitempty"`
-	Date    *string     `json:"date,omitempty"`
-	Output  *OutputType `json:"output,omitempty"`
+	SIDS     []string    `json:"sids"`
+	County   int         `json:"county"`
+	CLIMDIV  int         `json:"climdiv"`
+	CWA      string      `json:"cwa"`
+	Basin    int         `json:"basin"`
+	State    string      `json:"state"`
+	BBOX     []float64   `json:"bbox"`
+	Meta     *[]string   `json:"meta,omitempty"`
+	Elements *[]int      `json:"elems,omitempty"`
+	SDate    *string     `json:"sdate,omitempty"`
+	EDate    *string     `json:"edate,omitempty"`
+	Date     *string     `json:"date,omitempty"`
+	Output   *OutputType `json:"output,omitempty"`
 }
 
 type Interval struct {
@@ -88,29 +88,29 @@ type Element struct {
 }
 
 type StnDataRequest struct {
-	SID    string      `json:"sid"`
-	SDate  string      `json:"sdate"`
-	EDate  string      `json:"edate"`
-	Date   string      `json:"date"`
-	Elems  []Element   `json:"elems"`
-	Meta   *[]string   `json:"meta,omitempty"`
-	Output *OutputType `json:"output,omitempty"`
+	SID      string      `json:"sid"`
+	SDate    string      `json:"sdate"`
+	EDate    string      `json:"edate"`
+	Date     string      `json:"date"`
+	Elements []Element   `json:"elems"`
+	Meta     *[]string   `json:"meta,omitempty"`
+	Output   *OutputType `json:"output,omitempty"`
 }
 
 type MultiStnDataRequest struct {
-	SDate   string      `json:"sdate"`
-	EDate   string      `json:"edate"`
-	Date    string      `json:"date"`
-	Elems   []Element   `json:"elems"`
-	County  int         `json:"county"`
-	CLIMDIV int         `json:"climdiv"`
-	CWA     string      `json:"cwa"`
-	Basin   int         `json:"basin"`
-	State   string      `json:"state"`
-	BBOX    []float64   `json:"bbox"`
-	SIDS    []string    `json:"sids"`
-	Meta    *[]string   `json:"meta,omitempty"`
-	Output  *OutputType `json:"output,omitempty"`
+	SDate    string      `json:"sdate"`
+	EDate    string      `json:"edate"`
+	Date     string      `json:"date"`
+	Elements []Element   `json:"elems"`
+	County   int         `json:"county"`
+	CLIMDIV  int         `json:"climdiv"`
+	CWA      string      `json:"cwa"`
+	Basin    int         `json:"basin"`
+	State    string      `json:"state"`
+	BBOX     []float64   `json:"bbox"`
+	SIDS     []string    `json:"sids"`
+	Meta     *[]string   `json:"meta,omitempty"`
+	Output   *OutputType `json:"output,omitempty"`
 }
 
 type Projection string
@@ -138,31 +138,31 @@ type ImageSpec struct {
 }
 
 type GridRequest struct {
-	Grid   int         `json:"grid"`
-	SDate  *string     `json:"sdate,omitempty"`
-	EDate  string      `json:"edate"`
-	Date   string      `json:"date"`
-	Elems  []Element   `json:"elems"`
-	LOC    float64     `json:"loc"`
-	State  string      `json:"state"`
-	BBOX   []float64   `json:"bbox"`
-	Meta   *[]string   `json:"meta,omitempty"`
-	Output *OutputType `json:"output,omitempty"`
-	Image  *ImageSpec  `json:"image,omitempty"`
+	Grid     int         `json:"grid"`
+	SDate    *string     `json:"sdate,omitempty"`
+	EDate    string      `json:"edate"`
+	Date     string      `json:"date"`
+	Elements []Element   `json:"elems"`
+	LOC      float64     `json:"loc"`
+	State    string      `json:"state"`
+	BBOX     []float64   `json:"bbox"`
+	Meta     *[]string   `json:"meta,omitempty"`
+	Output   *OutputType `json:"output,omitempty"`
+	Image    *ImageSpec  `json:"image,omitempty"`
 }
 
 type Grid2Request struct {
-	Grid   int         `json:"grid"`
-	SDate  *string     `json:"sdate,omitempty"`
-	EDate  string      `json:"edate"`
-	Date   string      `json:"date"`
-	Elems  []Element   `json:"elems"`
-	LOC    float64     `json:"loc"`
-	State  string      `json:"state"`
-	BBOX   []float64   `json:"bbox"`
-	County int         `json:"county"`
-	Meta   *[]string   `json:"meta,omitempty"`
-	Output *OutputType `json:"output,omitempty"`
+	Grid     int         `json:"grid"`
+	SDate    *string     `json:"sdate,omitempty"`
+	EDate    string      `json:"edate"`
+	Date     string      `json:"date"`
+	Elements []Element   `json:"elems"`
+	LOC      float64     `json:"loc"`
+	State    string      `json:"state"`
+	BBOX     []float64   `json:"bbox"`
+	County   int         `json:"county"`
+	Meta     *[]string   `json:"meta,omitempty"`
+	Output   *OutputType `json:"output,omitempty"`
 }
 
 type GeneralRequest struct {
