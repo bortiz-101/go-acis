@@ -45,3 +45,14 @@ type StnDataResponse struct {
 	SMRY  []Value      `json:"smry,omitempty"`
 	Error string       `json:"error,omitempty"`
 }
+
+type MultiStnDataResult struct {
+	Meta StationMeta `json:"meta,omitempty"`
+	Data []DataRow   `json:"data,omitempty"`
+	SMRY []Value     `json:"smry,omitempty"`
+}
+
+type MultiStnDataResponse struct {
+	Data  []MultiStnDataResult `json:"data,omitempty`
+	Error string               `json:"error,omitempty"`
+}
