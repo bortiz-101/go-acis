@@ -26,3 +26,22 @@ type StationMeta struct {
 type StnMetaResonpse struct {
 	Meta []StationMeta `json:"meta"`
 }
+
+type Value struct {
+	Number     *float64
+	Missing    bool
+	Trace      bool
+	Accumalted bool
+}
+
+type DataRow struct {
+	Date   string
+	Values []Value
+}
+
+type StnDataResponse struct {
+	Meta  *StationMeta `json:"meta,omitempty"`
+	Data  []DataRow    `json:"data,omitempty"`
+	SMRY  []Value      `json:"smry,omitempty"`
+	Error string       `json:"error,omitempty"`
+}
