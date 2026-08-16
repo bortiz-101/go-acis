@@ -47,12 +47,12 @@ type StnDataResponse struct {
 }
 
 type MultiStnDataResult struct {
-	Meta StationMeta `json:"meta,omitempty"`
-	Data []DataRow   `json:"data,omitempty"`
-	SMRY []Value     `json:"smry,omitempty"`
+	Meta *StationMeta `json:"meta,omitempty"`
+	Data []DataRow    `json:"data,omitempty"`
+	SMRY []Value      `json:"smry,omitempty"`
 }
 
 type MultiStnDataResponse struct {
-	Data  []MultiStnDataResult `json:"data,omitempty`
+	Data  []MultiStnDataResult `json:"data,omitempty"`
 	Error string               `json:"error,omitempty"`
 }
