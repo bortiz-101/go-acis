@@ -15,7 +15,7 @@ go-acis/
 │   ├── config/               # structs and data types for ACIS
 │   │   └── config.go         # will read env vars and turn them into a typed go objects/whatever we need them for
 │   └── http/                 
-│       ├── handlers/         # basically whenever a route is hit, what function handles it
+│       ├── handlers/         # our handlers manage the http request coming TO the API
 │       │   └── health.go     # handler for our first endpoint
 │       └── router.go         # define all of our endpoints and routes
 ├── .gitignore
