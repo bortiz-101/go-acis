@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 )
@@ -48,6 +49,10 @@ func (c *Client) StnData(ctx context.Context, payload StnDataRequest) (StnDataRe
 		return StnDataResponse{}, fmt.Errorf("encoding error: %w", err)
 	}
 
+	// have to tell ACIS it is getting json. 500 w/o this
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "application/json")
+
 	response, err := c.httpClient.Do(request)
 	if err != nil {
 		return StnDataResponse{}, fmt.Errorf("encoding error: %w", err)
@@ -56,8 +61,18 @@ func (c *Client) StnData(ctx context.Context, payload StnDataRequest) (StnDataRe
 	// data streams have to be closed in go, cant rely on garb collector
 	defer response.Body.Close()
 
+	// ACIS includes specific error details in response body
 	if response.StatusCode != 200 {
-		return StnDataResponse{}, fmt.Errorf("ACIS returned unsuccessful status: %s", response.Status)
+		errorBody, err := io.ReadAll(response.Body)
+		if err != nil {
+			return StnDataResponse{}, err
+		}
+
+		return StnDataResponse{}, fmt.Errorf(
+			"ACIS returned %s: %s",
+			response.Status,
+			errorBody,
+		)
 	}
 
 	var result StnDataResponse
