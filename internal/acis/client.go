@@ -59,7 +59,9 @@ func (c *Client) StnData(ctx context.Context, payload StnDataRequest) (StnDataRe
 	}
 
 	// data streams have to be closed in go, cant rely on garb collector
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	// ACIS includes specific error details in response body
 	if response.StatusCode != 200 {
