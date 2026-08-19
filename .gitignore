@@ -8,6 +8,10 @@
 *.so
 *.dylib
 
+# Compiled application binaries
+/bin/
+/cmd/go_acis/main
+
 # Test binary, built with `go test -c`
 *.test
 

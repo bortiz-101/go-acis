@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/bortiz-101/go-acis/internal/acis"
 	apihttp "github.com/bortiz-101/go-acis/internal/http"
 )
 
@@ -14,7 +15,8 @@ This func will be entry point for whole api. Will eventually:
 -create and run our gin router
 */
 func main() {
-	router := apihttp.CreateRouter()
+	acisClient := acis.NewClient()
+	router := apihttp.CreateRouter(acisClient)
 	// 8080 by default
 	err := router.Run()
 	if err != nil {

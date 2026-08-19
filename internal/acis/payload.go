@@ -91,9 +91,9 @@ type Element struct {
 
 type StnDataRequest struct {
 	SID      string      `json:"sid"`
-	SDate    string      `json:"sdate"`
-	EDate    string      `json:"edate"`
-	Date     string      `json:"date"`
+	SDate    string      `json:"sdate,omitempty"`
+	EDate    string      `json:"edate,omitempty"`
+	Date     string      `json:"date,omitempty"`
 	Elements []Element   `json:"elems"`
 	Meta     *[]string   `json:"meta,omitempty"`
 	Output   *OutputType `json:"output,omitempty"`

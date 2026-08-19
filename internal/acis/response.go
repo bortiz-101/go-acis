@@ -33,11 +33,17 @@ type Value struct {
 	Accumalted bool
 }
 
+/*
+TODO: ACIS returns each data row as an array where the 0 index is the date, and consequent indices represent the values.
+this is shown in the notebook i used to test. We need to either implement a custom decoder to force into the DataRow shape you
+designed, or update the StnDataResponseBody to reflect this.
+*/
 type DataRow struct {
 	Date   string
 	Values []Value
 }
 
+// TODO: This response struct will not work in its current form or without a custom decoder
 type StnDataResponse struct {
 	Meta  *StationMeta `json:"meta,omitempty"`
 	Data  []DataRow    `json:"data,omitempty"`
