@@ -26,11 +26,23 @@ type StnMetaResonpse struct {
 	Meta []StationMeta `json:"meta"`
 }
 
+/*
+  - Missing ("M"): ACIS has no usable observation for that date. Use Number: nil and Missing:
+    true.
+
+  - Trace ("T"): an amount was observed, but it was smaller than the reporting precision,
+    typically precipitation or snowfall. It is not the same as an exact zero. I recommend
+    Number: nil and Trace: true.
+
+  - Accumulated ("1.25A"): the numeric amount was reported as an accumulated observation
+    rather than a clean observation for only that period. Remove the A, parse 1.25, and set
+    Accumulated: true.
+*/
 type Value struct {
-	Number     *float64
-	Missing    bool
-	Trace      bool
-	Accumalted bool
+	Number      *float64 `json:"number,omitempty"`
+	Missing     bool     `json:"missing,omitempty"`
+	Trace       bool     `json:"trace,omitempty"`
+	Accumulated bool     `json:"accumulated,omitempty"`
 }
 
 /*
@@ -39,8 +51,38 @@ this is shown in the notebook i used to test. We need to either implement a cust
 designed, or update the StnDataResponseBody to reflect this.
 */
 type DataRow struct {
-	Date   string
-	Values []Value
+	Date   string  `json:"date"`
+	Values []Value `json:"values"`
+}
+
+func (row *DataRow) UnmarshalJSON(data []byte) error {
+	// 0 index is always date in ACIS responses
+	var items []json.RawMessage
+
+	err := json.Unmarshal(data, &items)
+	if err != nil {
+		return err
+	}
+
+	var date string
+	err = json.Unmarshal(items[0], &date)
+	if err != nil {
+		return err
+	}
+	row.Date = date
+
+	// everything after the date is a returned value for the query to ACIS
+	if len(items) > 2 {
+		for _, rawVal := range items[1:] {
+			var val string
+			err := json.Unmarshal(rawVal, &val)
+			if err != nil {
+				return err
+			}
+			row.Values = append(row.Values, val)
+		}
+	}
+
 }
 
 // TODO: This response struct will not work in its current form or without a custom decoder
