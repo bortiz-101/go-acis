@@ -2,7 +2,11 @@
 // the ACIS web services.
 package acis
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strconv"
+	"strings"
+)
 
 type DateRange struct {
 	Start *string
@@ -45,11 +49,6 @@ type Value struct {
 	Accumulated bool     `json:"accumulated,omitempty"`
 }
 
-/*
-TODO: ACIS returns each data row as an array where the 0 index is the date, and consequent indices represent the values.
-this is shown in the notebook i used to test. We need to either implement a custom decoder to force into the DataRow shape you
-designed, or update the StnDataResponseBody to reflect this.
-*/
 type DataRow struct {
 	Date   string  `json:"date"`
 	Values []Value `json:"values"`
@@ -72,17 +71,37 @@ func (row *DataRow) UnmarshalJSON(data []byte) error {
 	row.Date = date
 
 	// everything after the date is a returned value for the query to ACIS
-	if len(items) > 2 {
-		for _, rawVal := range items[1:] {
-			var val string
-			err := json.Unmarshal(rawVal, &val)
+	for _, rawVal := range items[1:] {
+		var val Value
+		var valString string
+		err := json.Unmarshal(rawVal, &valString)
+		if err != nil {
+			return err
+		}
+		if valString == "M" {
+			val.Missing = true
+		} else if valString == "T" {
+			val.Trace = true
+			// ACIS observed something but it was below measurable precision
+		} else if strings.HasSuffix(valString, "A") {
+			val.Accumulated = true
+			num, err := strconv.ParseFloat(valString[:len(valString)-1], 64)
 			if err != nil {
 				return err
 			}
-			row.Values = append(row.Values, val)
+			val.Number = &num
+		} else {
+			num, err := strconv.ParseFloat(valString, 64)
+			if err != nil {
+				return err
+			}
+			val.Number = &num
 		}
+
+		row.Values = append(row.Values, val)
 	}
 
+	return nil
 }
 
 // TODO: This response struct will not work in its current form or without a custom decoder
