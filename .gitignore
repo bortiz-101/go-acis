@@ -28,7 +28,9 @@ profile.cov
 go.work
 go.work.sum
 
-# env file
+# env file and stuff for my notebook kernel
+.venv/
+.ipynb_checkpoints/
 .env
 
 # Editor/IDE
