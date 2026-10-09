@@ -13,18 +13,24 @@ func StnData(client *acis.Client) gin.HandlerFunc {
 
 		// decode the JSON sent to our API into StnDataReques struct
 		// let gin handle error responses https://gin-gonic.com/en/docs/binding/#bind-vs-shouldbind
-		if err := c.BindJSON(&payload); err != nil {
+		if err := c.ShouldBindJSON(&payload); err != nil {
+			c.JSON(http.StatusBadRequest, acis.Error{
+				Message: "Invalid JSON payload",
+				Code:    "INVALID_JSON",
+			})
 			return
 		}
 
 		// use ACIS client to send req to real service
 		result, err := client.StnData(c.Request.Context(), payload)
 		if err != nil {
-			c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadGateway, acis.Error{
+				Message: err.Error(),
+				Code:    "ACIS_ERROR",
+			})
 			return
 		}
 
 		c.JSON(http.StatusOK, result)
 	}
-
 }
