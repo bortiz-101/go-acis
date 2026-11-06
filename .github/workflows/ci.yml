@@ -11,6 +11,25 @@ permissions:
   contents: read
 
 jobs:
+  yaml-lint:
+    name: Stage 0 - YAML Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Lint GitHub configuration
+        run: yamllint .github/
+
   lint:
     name: Stage 1 - Lint & Security
     runs-on: ubuntu-latest
