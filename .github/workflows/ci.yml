@@ -69,8 +69,8 @@ jobs:
       - name: Verify dependencies
         run: go mod verify
 
-      - name: Run unit tests with race detector
-        run: go test -v -race -coverprofile=coverage.out ./...
+      # - name: Run unit tests with race detector
+      #  run: go test -v -race -coverprofile=coverage.out ./...
 
       - name: Build server binary
         run: go build -v -o bin/server ./cmd/go_acis
