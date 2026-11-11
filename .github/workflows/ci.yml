@@ -239,4 +239,3 @@ jobs:
             "$DISCORD_WEBHOOK_URL"
 
           echo "Discord notification sent: $STATUS"
-
