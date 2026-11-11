@@ -95,25 +95,37 @@ jobs:
           ACTOR: ${{ github.actor }}
           EVENT: ${{ github.event_name }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
         run: |
-          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+          set -euo pipefail
+
+          if [[ -z "$DISCORD_WEBHOOK_URL" ]]; then
             echo "Discord webhook secret is not configured."
             exit 0
           fi
 
-          if [ "$UPDATE_RESULT" = "success" ]; then
-            COLOR=5763719
-            STATUS="SUCCESS"
-            DESCRIPTION="Go dependency update completed successfully."
-          elif [ "$UPDATE_RESULT" = "cancelled" ]; then
-            COLOR=16753920
-            STATUS="CANCELLED"
-            DESCRIPTION="Go dependency update was cancelled."
-          else
-            COLOR=15548997
-            STATUS="FAILED"
-            DESCRIPTION="Go dependency update encountered an error."
-          fi
+          case "$UPDATE_RESULT" in
+            success)
+              STATUS="SUCCESS"
+              COLOR=5763719
+              DESCRIPTION="Go dependency update completed successfully."
+              ;;
+            failure)
+              STATUS="FAILED"
+              COLOR=15548997
+              DESCRIPTION="Go dependency update encountered an error."
+              ;;
+            cancelled)
+              STATUS="CANCELLED"
+              COLOR=16753920
+              DESCRIPTION="Go dependency update was cancelled."
+              ;;
+            *)
+              STATUS="UNKNOWN"
+              COLOR=9807270
+              DESCRIPTION="Go dependency update finished with status: $UPDATE_RESULT"
+              ;;
+          esac
 
           PAYLOAD=$(jq -n \
             --arg title "Go Dependency Updates: $STATUS" \
@@ -121,6 +133,7 @@ jobs:
             --arg repo "$REPOSITORY" \
             --arg actor "$ACTOR" \
             --arg event "$EVENT" \
+            --arg result "$UPDATE_RESULT" \
             --arg url "$RUN_URL" \
             --argjson color "$COLOR" \
             '{
@@ -129,17 +142,40 @@ jobs:
                 description: $description,
                 color: $color,
                 fields: [
-                  {name: "Repository", value: $repo, inline: true},
-                  {name: "Triggered by", value: $actor, inline: true},
-                  {name: "Trigger", value: $event, inline: true}
+                  {
+                    name: "Repository",
+                    value: $repo,
+                    inline: true
+                  },
+                  {
+                    name: "Triggered by",
+                    value: $actor,
+                    inline: true
+                  },
+                  {
+                    name: "Trigger",
+                    value: $event,
+                    inline: true
+                  },
+                  {
+                    name: "Job Result",
+                    value: $result,
+                    inline: true
+                  }
                 ],
                 url: $url,
-                footer: {text: "GitHub Actions • Dependency Maintenance"},
+                footer: {
+                  text: "GitHub Actions • Dependency Maintenance"
+                },
                 timestamp: (now | todate)
               }]
             }')
+
+          echo "$PAYLOAD" | jq empty
 
           curl --fail-with-body --silent --show-error \
             -H "Content-Type: application/json" \
             -d "$PAYLOAD" \
             "$DISCORD_WEBHOOK_URL"
+
+          echo "Discord notification sent: $STATUS"
