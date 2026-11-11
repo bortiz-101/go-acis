@@ -1,0 +1,13 @@
+---
+name: Setup Go
+description: Set up Go using the version specified in go.mod
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Go
+      uses: actions/setup-go@v7
+      with:
+        go-version-file: go.mod
+        check-latest: true
+        cache: true

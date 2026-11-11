@@ -1,0 +1,78 @@
+---
+name: Go Dependency Updates
+
+on:
+  schedule:
+    # Run at 09:00 UTC on the first day of every month
+    - cron: "0 9 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: go-dependency-updates
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: Update Go & Dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up latest stable Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: "stable"
+          check-latest: true
+          cache: true
+
+      - name: Update Go version
+        run: go get go@latest
+
+      - name: Update dependencies
+        run: go get -u ./...
+
+      - name: Tidy Go modules
+        run: go mod tidy
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      # - name: Run unit tests
+      #  run: go test -v -race -coverprofile=coverage.out ./...
+
+      - name: Build server binary
+        run: |
+          mkdir -p bin
+          go build -v -o bin/server ./cmd/go_acis
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: automation/go-dependency-updates
+          delete-branch: true
+          add-paths: |
+            go.mod
+            go.sum
+          commit-message: "chore: update Go and dependencies"
+          title: "chore: monthly Go and dependency updates"
+          body: |
+            ## Automated Go maintenance
+
+            This PR was generated automatically.
+
+            ### Changes
+            - Updated Go to the latest stable release.
+            - Updated Go dependencies.
+            - Ran go mod tidy.
+            - Verified dependencies.
+            - Built the server binary.
+
+            Please review dependency changes and potential breaking changes
+            before merging.

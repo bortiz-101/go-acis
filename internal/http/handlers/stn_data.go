@@ -22,7 +22,7 @@ func StnData(client *acis.Client) gin.HandlerFunc {
 		}
 
 		// use ACIS client to send req to real service
-		result, err := client.StnData(c.Request.Context(), payload)
+		result, err := client.GetStnData(c.Request.Context(), payload)
 		if err != nil {
 			c.JSON(http.StatusBadGateway, acis.Error{
 				Message: err.Error(),
