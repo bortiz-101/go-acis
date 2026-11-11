@@ -104,19 +104,19 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+          if [[ -z "$DISCORD_WEBHOOK_URL" ]]; then
             echo "Discord webhook secret is not configured."
             exit 0
           fi
 
           # Determine overall pipeline status.
-          if [[ "$YAML_RESULT" == "failure" || \
-                "$LINT_RESULT" == "failure" || \
+          if [[ "$YAML_RESULT" == "failure" ||
+                "$LINT_RESULT" == "failure" ||
                 "$BUILD_RESULT" == "failure" ]]; then
             STATUS="FAILED"
             COLOR=15548997
-          elif [[ "$YAML_RESULT" == "cancelled" || \
-                  "$LINT_RESULT" == "cancelled" || \
+          elif [[ "$YAML_RESULT" == "cancelled" ||
+                  "$LINT_RESULT" == "cancelled" ||
                   "$BUILD_RESULT" == "cancelled" ]]; then
             STATUS="CANCELLED"
             COLOR=16753920
@@ -127,36 +127,30 @@ jobs:
 
           # Format individual stage results.
           format_stage() {
-            local name="$1"
-            local result="$2"
-
-            case "$result" in
-              success)  echo "✅ SUCCESS" ;;
-              failure)  echo "❌ FAILED" ;;
+            case "$1" in
+              success)   echo "✅ SUCCESS" ;;
+              failure)   echo "❌ FAILED" ;;
               cancelled) echo "⚠️ CANCELLED" ;;
-              skipped)  echo "⏭️ SKIPPED" ;;
-              *)        echo "❔ $result" ;;
+              skipped)   echo "⏭️ SKIPPED" ;;
+              *)         echo "❔ $1" ;;
             esac
           }
 
-          YAML_STATUS=$(format_stage "YAML" "$YAML_RESULT")
-          LINT_STATUS=$(format_stage "Lint & Security" "$LINT_RESULT")
-          BUILD_STATUS=$(format_stage "Build & Test" "$BUILD_RESULT")
+          YAML_STATUS=$(format_stage "$YAML_RESULT")
+          LINT_STATUS=$(format_stage "$LINT_RESULT")
+          BUILD_STATUS=$(format_stage "$BUILD_RESULT")
 
-          # Identify failed stages.
+          # Collect failed stages.
           FAILED_STAGES=""
 
-          if [[ "$YAML_RESULT" == "failure" ]]; then
-            FAILED_STAGES="${FAILED_STAGES}• YAML Validation\n"
-          fi
+          [[ "$YAML_RESULT" == "failure" ]] &&
+            FAILED_STAGES+="• YAML Validation"$'\n'
 
-          if [[ "$LINT_RESULT" == "failure" ]]; then
-            FAILED_STAGES="${FAILED_STAGES}• Lint & Security\n"
-          fi
+          [[ "$LINT_RESULT" == "failure" ]] &&
+            FAILED_STAGES+="• Lint & Security"$'\n'
 
-          if [[ "$BUILD_RESULT" == "failure" ]]; then
-            FAILED_STAGES="${FAILED_STAGES}• Build & Test\n"
-          fi
+          [[ "$BUILD_RESULT" == "failure" ]] &&
+            FAILED_STAGES+="• Build & Test"$'\n'
 
           if [[ "$STATUS" == "FAILED" ]]; then
             DESCRIPTION="One or more CI stages failed. Check the failed stages below."
@@ -166,6 +160,7 @@ jobs:
             DESCRIPTION="All CI stages completed successfully."
           fi
 
+          # Construct Discord embed.
           PAYLOAD=$(jq -n \
             --arg title "CI Pipeline: $STATUS" \
             --arg description "$DESCRIPTION" \
@@ -184,7 +179,7 @@ jobs:
                 title: $title,
                 description: $description,
                 color: $color,
-                fields: [
+                fields: ([
                   {
                     name: "Repository",
                     value: $repo,
@@ -222,8 +217,10 @@ jobs:
                       value: $failed,
                       inline: false
                     }]
-                  else [] end
-                ),
+                  else
+                    []
+                  end
+                )),
                 url: $url,
                 footer: {
                   text: ("GitHub Actions • CI Pipeline • " + $event)
@@ -232,9 +229,14 @@ jobs:
               }]
             }')
 
+          # Validate JSON before sending.
+          echo "$PAYLOAD" | jq empty
+
+          # Send notification.
           curl --fail-with-body --silent --show-error \
             -H "Content-Type: application/json" \
             -d "$PAYLOAD" \
             "$DISCORD_WEBHOOK_URL"
 
           echo "Discord notification sent: $STATUS"
+
