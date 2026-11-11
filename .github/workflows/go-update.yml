@@ -76,3 +76,71 @@ jobs:
 
             Please review dependency changes and potential breaking changes
             before merging.
+
+  
+  notify-discord:
+    name: Discord Notification
+    runs-on: ubuntu-latest
+
+    needs:
+      - update
+
+    if: always()
+
+    steps:
+      - name: Send dependency update result to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          UPDATE_RESULT: ${{ needs.update.result }}
+          REPOSITORY: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+          EVENT: ${{ github.event_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "Discord webhook secret is not configured."
+            exit 0
+          fi
+
+          if [ "$UPDATE_RESULT" = "success" ]; then
+            COLOR=5763719
+            STATUS="SUCCESS"
+            DESCRIPTION="Go dependency update completed successfully."
+          elif [ "$UPDATE_RESULT" = "cancelled" ]; then
+            COLOR=16753920
+            STATUS="CANCELLED"
+            DESCRIPTION="Go dependency update was cancelled."
+          else
+            COLOR=15548997
+            STATUS="FAILED"
+            DESCRIPTION="Go dependency update encountered an error."
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg title "Go Dependency Updates: $STATUS" \
+            --arg description "$DESCRIPTION" \
+            --arg repo "$REPOSITORY" \
+            --arg actor "$ACTOR" \
+            --arg event "$EVENT" \
+            --arg url "$RUN_URL" \
+            --argjson color "$COLOR" \
+            '{
+              embeds: [{
+                title: $title,
+                description: $description,
+                color: $color,
+                fields: [
+                  {name: "Repository", value: $repo, inline: true},
+                  {name: "Triggered by", value: $actor, inline: true},
+                  {name: "Trigger", value: $event, inline: true}
+                ],
+                url: $url,
+                footer: {text: "GitHub Actions • Dependency Maintenance"},
+                timestamp: (now | todate)
+              }]
+            }')
+
+          curl --fail-with-body --silent --show-error \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK_URL"

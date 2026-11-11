@@ -53,7 +53,9 @@ jobs:
 
   build:
     name: Stage 2 - Build & Test
-    needs: lint
+    needs:
+      - yaml-lint
+      - lint
     runs-on: ubuntu-latest
 
     steps:
@@ -74,3 +76,165 @@ jobs:
 
       - name: Build server binary
         run: go build -v -o bin/server ./cmd/go_acis
+
+  notify-discord:
+    name: Stage 3 - Discord Notification
+    runs-on: ubuntu-latest
+
+    needs:
+      - yaml-lint
+      - lint
+      - build
+
+    if: always()
+
+    steps:
+      - name: Send stage-specific CI result to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          YAML_RESULT: ${{ needs.yaml-lint.result }}
+          LINT_RESULT: ${{ needs.lint.result }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+          ACTOR: ${{ github.actor }}
+          EVENT: ${{ github.event_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "Discord webhook secret is not configured."
+            exit 0
+          fi
+
+          # Determine overall pipeline status.
+          if [[ "$YAML_RESULT" == "failure" || \
+                "$LINT_RESULT" == "failure" || \
+                "$BUILD_RESULT" == "failure" ]]; then
+            STATUS="FAILED"
+            COLOR=15548997
+          elif [[ "$YAML_RESULT" == "cancelled" || \
+                  "$LINT_RESULT" == "cancelled" || \
+                  "$BUILD_RESULT" == "cancelled" ]]; then
+            STATUS="CANCELLED"
+            COLOR=16753920
+          else
+            STATUS="SUCCESS"
+            COLOR=5763719
+          fi
+
+          # Format individual stage results.
+          format_stage() {
+            local name="$1"
+            local result="$2"
+
+            case "$result" in
+              success)  echo "✅ SUCCESS" ;;
+              failure)  echo "❌ FAILED" ;;
+              cancelled) echo "⚠️ CANCELLED" ;;
+              skipped)  echo "⏭️ SKIPPED" ;;
+              *)        echo "❔ $result" ;;
+            esac
+          }
+
+          YAML_STATUS=$(format_stage "YAML" "$YAML_RESULT")
+          LINT_STATUS=$(format_stage "Lint & Security" "$LINT_RESULT")
+          BUILD_STATUS=$(format_stage "Build & Test" "$BUILD_RESULT")
+
+          # Identify failed stages.
+          FAILED_STAGES=""
+
+          if [[ "$YAML_RESULT" == "failure" ]]; then
+            FAILED_STAGES="${FAILED_STAGES}• YAML Validation\n"
+          fi
+
+          if [[ "$LINT_RESULT" == "failure" ]]; then
+            FAILED_STAGES="${FAILED_STAGES}• Lint & Security\n"
+          fi
+
+          if [[ "$BUILD_RESULT" == "failure" ]]; then
+            FAILED_STAGES="${FAILED_STAGES}• Build & Test\n"
+          fi
+
+          if [[ "$STATUS" == "FAILED" ]]; then
+            DESCRIPTION="One or more CI stages failed. Check the failed stages below."
+          elif [[ "$STATUS" == "CANCELLED" ]]; then
+            DESCRIPTION="The CI pipeline was cancelled."
+          else
+            DESCRIPTION="All CI stages completed successfully."
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg title "CI Pipeline: $STATUS" \
+            --arg description "$DESCRIPTION" \
+            --arg repo "$REPOSITORY" \
+            --arg branch "$BRANCH" \
+            --arg actor "$ACTOR" \
+            --arg event "$EVENT" \
+            --arg yaml "$YAML_STATUS" \
+            --arg lint "$LINT_STATUS" \
+            --arg build "$BUILD_STATUS" \
+            --arg failed "$FAILED_STAGES" \
+            --arg url "$RUN_URL" \
+            --argjson color "$COLOR" \
+            '{
+              embeds: [{
+                title: $title,
+                description: $description,
+                color: $color,
+                fields: [
+                  {
+                    name: "Repository",
+                    value: $repo,
+                    inline: true
+                  },
+                  {
+                    name: "Branch",
+                    value: $branch,
+                    inline: true
+                  },
+                  {
+                    name: "Triggered by",
+                    value: $actor,
+                    inline: true
+                  },
+                  {
+                    name: "Stage 0 - YAML Validation",
+                    value: $yaml,
+                    inline: true
+                  },
+                  {
+                    name: "Stage 1 - Lint & Security",
+                    value: $lint,
+                    inline: true
+                  },
+                  {
+                    name: "Stage 2 - Build & Test",
+                    value: $build,
+                    inline: true
+                  }
+                ] + (
+                  if $failed != "" then
+                    [{
+                      name: "Failed stages",
+                      value: $failed,
+                      inline: false
+                    }]
+                  else [] end
+                ),
+                url: $url,
+                footer: {
+                  text: ("GitHub Actions • CI Pipeline • " + $event)
+                },
+                timestamp: (now | todate)
+              }]
+            }')
+
+          curl --fail-with-body --silent --show-error \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK_URL"
+
+          echo "Discord notification sent: $STATUS"
